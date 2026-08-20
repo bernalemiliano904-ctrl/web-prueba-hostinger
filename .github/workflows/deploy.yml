@@ -11,22 +11,26 @@ jobs:
 
     steps:
       - name: Configurar SSH
+        shell: bash
         env:
           VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
           VPS_HOST: ${{ secrets.VPS_HOST }}
         run: |
-          mkdir -p ~/.ssh
-          printf '%s\n' "$VPS_SSH_KEY" | sed 's/\r$//' > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keygen -y -f ~/.ssh/id_ed25519 > /dev/null
-          ssh-keyscan -H "$VPS_HOST" >> ~/.ssh/known_hosts
+          mkdir -p "$HOME/.ssh"
+          printf '%s\n' "$VPS_SSH_KEY" > "$HOME/.ssh/id_ed25519"
+          chmod 600 "$HOME/.ssh/id_ed25519"
+
+          ssh-keygen -y -f "$HOME/.ssh/id_ed25519" > /dev/null
+
+          ssh-keyscan -H "$VPS_HOST" >> "$HOME/.ssh/known_hosts"
 
       - name: Desplegar en VPS
+        shell: bash
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
           VPS_USER: ${{ secrets.VPS_USER }}
         run: |
-          ssh -i ~/.ssh/id_ed25519 "$VPS_USER@$VPS_HOST" '
+          ssh -i "$HOME/.ssh/id_ed25519" "$VPS_USER@$VPS_HOST" '
             cd /docker/web-prueba &&
             git pull origin main &&
             docker compose up -d

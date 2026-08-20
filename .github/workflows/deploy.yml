@@ -17,7 +17,9 @@ jobs:
           VPS_HOST: ${{ secrets.VPS_HOST }}
         run: |
           mkdir -p "$HOME/.ssh"
+
           printf '%s\n' "$VPS_SSH_KEY" > "$HOME/.ssh/id_ed25519"
+
           chmod 600 "$HOME/.ssh/id_ed25519"
 
           ssh-keygen -y -f "$HOME/.ssh/id_ed25519" > /dev/null
@@ -33,5 +35,5 @@ jobs:
           ssh -i "$HOME/.ssh/id_ed25519" "$VPS_USER@$VPS_HOST" '
             cd /docker/web-prueba &&
             git pull origin main &&
-            docker compose up -d
+            docker compose up -d --force-recreate
           '
